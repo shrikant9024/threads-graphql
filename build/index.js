@@ -13,34 +13,20 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
-const server_1 = require("@apollo/server");
 const express4_1 = require("@apollo/server/express4");
-const app = (0, express_1.default)();
+const graphql_1 = __importDefault(require("./graphql"));
 const body_parser_1 = __importDefault(require("body-parser"));
-const PORT = Number(process.env.PORT) || 8000;
 //create graphql server
 function init() {
     return __awaiter(this, void 0, void 0, function* () {
-        const gqlServer = new server_1.ApolloServer({
-            typeDefs: `
-    type Query{
-        hello:String
-        say(name:String):String
-    }`,
-            resolvers: {
-                Query: {
-                    hello: () => `Hey there it is a graphql server`,
-                    say: (_, { name }) => `Hey ${name}, hello from graphql Server`,
-                },
-            },
-        });
+        const app = (0, express_1.default)();
+        const PORT = Number(process.env.PORT) || 8000;
         app.use(body_parser_1.default.json());
-        yield gqlServer.start();
         app.get("/", (req, res) => {
             res.json({ message: "Sever is up and running" });
         });
         //adas
-        app.use("/graphql", (0, express4_1.expressMiddleware)(gqlServer));
+        app.use("/graphql", (0, express4_1.expressMiddleware)(yield (0, graphql_1.default)()));
         app.listen(PORT, () => console.log(`Server is running on port : ${PORT} `));
     });
 }
